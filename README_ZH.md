@@ -64,6 +64,9 @@ new Vue({
             x: 503,
             y: 676,
             alignment: 2, // 1-居左 2-居中 3-居右
+            style: {
+              width: '120px'
+            }
           }
         ]
       }
@@ -104,7 +107,8 @@ PicTemplateData {
     fontColor?: string;
     x: number;
     y: number;
-    alignment: 1 | 2 | 3; // 1-left 2-center 3-right
+    alignment: 1 | 2 | 3; // 1-居左 2-居中 3-居右
+    style?: {};
   }>;
 }
 ```
@@ -113,5 +117,10 @@ PicTemplateOps {
   debug?: boolean; // default false
   imageType?: string; // default image/png
   autoRender?: boolean; // default true
+  renderType?: 'blob' | 'base64'; // default base64
+  renderEnd?: ({
+    renderImage: string;
+    canvas: HTMLCanvasElement;
+  }) => void;
 }
 ```

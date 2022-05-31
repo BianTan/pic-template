@@ -5,7 +5,7 @@
       v-if="backgroundImage !== ''"
       ref="background-image"
       :src="backgroundImage"
-      style="width: 100%; height: auto; display: block;"
+      style="width: 100%; height: auto; display: block; opacity: 0;"
       @error="handleImageError"
     >
     <!-- 生成图片 -->
@@ -36,12 +36,13 @@
         <img
           v-if="item.type === 2"
           :key="index"
+          :src="item.content"
           :style="item.style"
           class="item item-image"
         >
       </template>
       <!-- 生成好的证书图片 -->
-      <img v-if="base64 !== ''" :src="base64" class="touch-img" alt="touch-img">
+      <img v-if="renderImage" :src="renderImage" class="touch-img" alt="touch-img">
     </div>
   </div>
 </template>
@@ -76,12 +77,13 @@ export default {
       minHeight: 0, // 最小高度
       scale: 1, // 缩放
       pixelRatio: window.devicePixelRatio, // 设备缩放
-      base64: '', // 生成好的证书图片
+      renderImage: '', // 生成好的证书图片
       backgroundImage: '', // 证书背景图
       components: [],
       show: false,
       ops: {
         debug: false,
+        renderType: 'base64',
         imageType: 'image/png',
         autoRender: true
       }
@@ -98,9 +100,21 @@ export default {
   mounted() {
     this.init()
   },
+  beforeDestroy() {
+    URL.revokeObjectURL(this.renderImage)
+    this.revokeObjectURL()
+  },
   methods: {
     init() {
       Object.assign(this.ops, this.options)
+    },
+    revokeObjectURL() {
+      URL.revokeObjectURL(this.backgroundImage)
+      const nodeList = this.$refs['template-box'].querySelectorAll('.item-image')
+      if (!nodeList) return
+      Array.from(nodeList).forEach(f => {
+        URL.revokeObjectURL(f.src)
+      })
     },
     async setData() {
       if (!this.data['bgImage']) {
@@ -109,8 +123,8 @@ export default {
       try {
         this.$emit('change', true)
         await this.$nextTick()
+        this.revokeObjectURL()
         const bgImage = await toBlobURL(this.data['bgImage'], true)
-        console.log('bgImage', bgImage)
         if (bgImage && bgImage.url) {
           const { width, height, url } = bgImage
           this.backgroundImage = url
@@ -122,6 +136,7 @@ export default {
           this.minHeight = height + 'px'
           // 格式化
           this.setComponents(this.data['list'])
+          await this.$nextTick()
           // 转换为本地图片
           const imgs = this.$refs['template-box'].querySelectorAll('.item-image')
           await convertToBlobImage(imgs, 10000)
@@ -138,6 +153,7 @@ export default {
     async render() {
       try {
         this.$emit('change', true)
+        URL.revokeObjectURL(this.renderImage)
         await this.$nextTick()
         await new Promise(res => setTimeout(() => res(), 500))
         const options = {
@@ -150,17 +166,28 @@ export default {
           scrollY: 0
         }
         const canvas = await html2canvas(this.$refs['template-box'], options)
-        if (canvas) {
-          this.base64 = canvas.toDataURL(this.ops['imageType'])
-          this.ops['renderEnd'] && this.ops['renderEnd']({ base64: this.base64 })
-          this.$emit('change', false)
-          return true
+        // 生成图片
+        if (this.ops['renderType'] === 'base64') {
+          this.renderImage = canvas.toDataURL(this.ops['imageType'])
+        } else if (this.ops['renderType'] === 'blob') {
+          this.renderImage = await new Promise((res, rej) => {
+            canvas.toBlob(function(blob) {
+              if (blob) {
+                res(URL.createObjectURL(blob))
+              } else {
+                rej('toBlob error')
+              }
+            }, this.ops['imageType'])
+          })
         }
+        // 回调
+        this.ops['renderEnd'] && this.ops['renderEnd']({ image: this.renderImage, canvas })
         this.$emit('change', false)
-        return false
-      } catch {
-        this.$emit('error', '渲染失败')
-        return false
+        return canvas
+      } catch (err) {
+        this.$emit('error', err)
+        this.$emit('change', false)
+        return null
       }
     },
     setComponents(list = []) {
@@ -204,6 +231,7 @@ export default {
 .pic-template {
   position: relative;
   overflow: hidden;
+  user-select: none;
   .template-box {
     position: absolute;
     top: 0;
@@ -224,6 +252,7 @@ export default {
       height: 100%;
       z-index: 10;
       opacity: 0;
+      user-select: auto;
     }
   }
 }
