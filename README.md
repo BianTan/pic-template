@@ -74,8 +74,8 @@ new Vue({
   },
   methods: {
     async render() {
-      const res = await this.$refs['boxRef'].render()
-      console.log('res:', res)
+      const canvas = await this.$refs['boxRef'].render()
+      console.log('res:', canvas)
     },
     onError(error) {
       console.log(error)

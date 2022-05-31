@@ -24,22 +24,24 @@
       >
       <template v-for="(item, index) in components">
         <!-- 文本 -->
-        <p
-          v-if="item.type === 1"
-          :key="index"
-          :style="item.style"
-          class="item"
-        >
-          {{ item.content }}
-        </p>
+        <template v-if="item.type === 1">
+          <p
+            :key="index"
+            :style="item.style"
+            class="item"
+          >
+            {{ item.content }}
+          </p>
+        </template>
         <!-- 图片 -->
-        <img
-          v-if="item.type === 2"
-          :key="index"
-          :src="item.content"
-          :style="item.style"
-          class="item item-image"
-        >
+        <template v-else-if="item.type === 2">
+          <img
+            :key="index"
+            :src="item.content"
+            :style="item.style"
+            class="item item-image"
+          >
+        </template>
       </template>
       <!-- 生成好的证书图片 -->
       <img v-if="renderImage" :src="renderImage" class="touch-img" alt="touch-img">
@@ -94,7 +96,8 @@ export default {
       handler: async function(data) {
         await this.setData(data)
       },
-      immediate: true
+      immediate: true,
+      deep: true
     }
   },
   mounted() {
