@@ -93,8 +93,16 @@ new Vue({
 
 ## PicTemplate Events
 | Event | Description | Arguments
-|:------| :------ | :------
-| error | error | error: string |
+|:------| :------ | :------ |
+| error | error | (error: string, code: number) |
+
+### Code
+| Code | Description
+|:------| :------ |
+| 101 | timeout |
+| 102 | setData error |
+| 103 | render error |
+| 104 | image load error |
 
 ## PicTemplate Types
 ```
@@ -118,6 +126,7 @@ PicTemplateOps {
   imageType?: string; // default image/png
   autoRender?: boolean; // default true
   renderType?: 'blob' | 'base64'; // default base64
+  timeout?: null | number; // default null
   renderEnd?: ({
     renderImage: string;
     canvas: HTMLCanvasElement;

@@ -93,8 +93,16 @@ new Vue({
 
 ## PicTemplate Events
 | 事件名 | 描述 | 参数
-|:------| :------ | :------
-| error | 输出错误信息 | error: string |
+|:------| :------ | :------ |
+| error | 输出错误信息 | (error: string, code: number) |
+
+### Code
+| Code | 描述
+|:------| :------ |
+| 101 | 超时 |
+| 102 | 设置数据错误 |
+| 103 | 渲染错误 |
+| 104 | 图片加载错误 |
 
 ## PicTemplate Types
 ```
@@ -118,6 +126,7 @@ PicTemplateOps {
   imageType?: string; // default image/png
   autoRender?: boolean; // default true
   renderType?: 'blob' | 'base64'; // default base64
+  timeout?: null | number; // default null
   renderEnd?: ({
     renderImage: string;
     canvas: HTMLCanvasElement;

@@ -83,11 +83,13 @@ export default {
       backgroundImage: '', // 证书背景图
       components: [],
       show: false,
+      timer: null,
       ops: {
         debug: false,
         renderType: 'base64',
         imageType: 'image/png',
-        autoRender: true
+        autoRender: true,
+        timeout: null
       }
     }
   },
@@ -98,6 +100,19 @@ export default {
       },
       immediate: true,
       deep: true
+    },
+    loading: {
+      handler: async function(state) {
+        const self = this
+        this.timer && clearTimeout(this.timer)
+        if (state && this.ops !== null) {
+          this.timer = setTimeout(() => {
+            self.$emit('change', false)
+            this.$emit('error', '超时', 101)
+          }, this.ops['timeout'])
+        }
+      },
+      immediate: true
     }
   },
   mounted() {
@@ -148,8 +163,8 @@ export default {
         }
         if (!this.ops['autoRender']) this.$emit('change', false)
       } catch (err) {
+        this.$emit('error', err, 102)
         this.$emit('change', false)
-        this.$emit('error', err)
       }
     },
     // 渲染
@@ -188,7 +203,7 @@ export default {
         this.$emit('change', false)
         return canvas
       } catch (err) {
-        this.$emit('error', err)
+        this.$emit('error', err, 103)
         this.$emit('change', false)
         return null
       }
@@ -223,8 +238,8 @@ export default {
       this.components = components
     },
     handleImageError() {
+      this.$emit('error', '证书图片加载失败', 104)
       this.$emit('change', false)
-      this.$emit('error', '证书图片加载失败')
     }
   }
 }

@@ -1,6 +1,6 @@
 {
   "name": "pic-template",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "A Vue Component for html2canvas (https://html2canvas.hertzen.com/).",
   "main": "index.js",
   "files": ["src"],
