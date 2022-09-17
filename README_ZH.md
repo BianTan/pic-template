@@ -32,13 +32,11 @@ npm install --save pic-template
 />
 ```
 
-### 全局导入
 ```js
 import PicTemplate from 'pic-template'
 Vue.use(PicTemplate)
 ```
 
-### 按需导入
 ```js
 import PicTemplate from 'pic-template'
 
