@@ -32,13 +32,11 @@ npm install --save pic-template
 />
 ```
 
-### Global Import
 ```js
 import PicTemplate from 'pic-template'
 Vue.use(PicTemplate)
 ```
 
-### Import on Demand
 ```js
 import PicTemplate from 'pic-template'
 
